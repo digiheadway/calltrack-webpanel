@@ -187,7 +187,7 @@ export default function StoragePage() {
         if (type === 'employee') params.append('employee_id', value);
         else params.append(type, value);
 
-        const url = `https://calltrack.mylistings.in/api/billing.php?${params.toString()}`;
+        const url = `https://api.miniclickcrm.com/api/billing.php?${params.toString()}`;
         const token = localStorage.getItem('cc_token');
 
         try {

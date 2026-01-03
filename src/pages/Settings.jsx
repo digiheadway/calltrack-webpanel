@@ -90,7 +90,7 @@ export default function Settings() {
         setExportLoading(prev => ({ ...prev, calls: true }));
         try {
             const params = new URLSearchParams({ action: 'export', type: 'calls', dateRange: exportDateRange });
-            const response = await fetch(`https://calltrack.mylistings.in/api/export.php?${params.toString()}`, {
+            const response = await fetch(`https://api.miniclickcrm.com/api/export.php?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('cc_token')}` }
             });
             const blob = await response.blob();
@@ -114,7 +114,7 @@ export default function Settings() {
         setExportLoading(prev => ({ ...prev, callers: true }));
         try {
             const params = new URLSearchParams({ action: 'export', type: 'callers' });
-            const response = await fetch(`https://calltrack.mylistings.in/api/export.php?${params.toString()}`, {
+            const response = await fetch(`https://api.miniclickcrm.com/api/export.php?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('cc_token')}` }
             });
             const blob = await response.blob();
