@@ -43,6 +43,7 @@ export default defineConfig({
         'sales-crm': resolve(__dirname, 'sales-crm/index.html'),
         'auto-dialer': resolve(__dirname, 'auto-dialer/index.html'),
         products: resolve(__dirname, 'products/index.html'),
+        'call-track': resolve(__dirname, 'call-track/index.html'),
       },
     },
   },
