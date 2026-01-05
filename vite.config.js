@@ -32,6 +32,8 @@ export default defineConfig({
         features: resolve(__dirname, 'features/index.html'),
         download: resolve(__dirname, 'download/index.html'),
         setup: resolve(__dirname, 'setup/index.html'),
+        'setup-manager': resolve(__dirname, 'setup/manager/index.html'),
+        'setup-employee': resolve(__dirname, 'setup/employee/index.html'),
         'forgot-password': resolve(__dirname, 'forgot-password/index.html'),
         'reset-password': resolve(__dirname, 'reset-password/index.html'),
         'verify-email': resolve(__dirname, 'verify-email/index.html'),
