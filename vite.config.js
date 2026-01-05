@@ -44,6 +44,7 @@ export default defineConfig({
         'auto-dialer': resolve(__dirname, 'auto-dialer/index.html'),
         products: resolve(__dirname, 'products/index.html'),
         'call-track': resolve(__dirname, 'call-track/index.html'),
+        'support': resolve(__dirname, 'support/index.html'),
       },
     },
   },
