@@ -128,6 +128,8 @@
                             Works</a>
                         <a href="#pricing"
                             class="hover:text-brand-400 transition-colors px-3 py-2 text-sm font-medium">Pricing</a>
+                        <a href="#faqs"
+                            class="hover:text-brand-400 transition-colors px-3 py-2 text-sm font-medium">FAQs</a>
                     </div>
                 </div>
                 <div id="auth-desktop" class="hidden md:flex items-center gap-4">
@@ -155,6 +157,7 @@
                 <a href="#how-it-works" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5">How it
                     Works</a>
                 <a href="#pricing" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5">Pricing</a>
+                <a href="#faqs" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5">FAQs</a>
                 <a id="auth-mobile-login" href="login/"
                     class="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5">Log
                     In</a>
@@ -458,6 +461,113 @@
         </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section id="faqs" class="py-24 relative overflow-hidden bg-white/[0.02]">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-base text-brand-400 font-semibold tracking-wide uppercase">Support</h2>
+                <p class="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Frequently Asked Questions</p>
+                <p class="mt-4 text-gray-400">Everything you need to know about Call Track by MiniClick.</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ 1 -->
+                <div class="glass-card rounded-2xl overflow-hidden transition-all duration-300">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center group"
+                        onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                        <span class="text-lg font-semibold text-white group-hover:text-brand-400 transition-colors">What
+                            devices are supported?</span>
+                        <i data-feather="chevron-down" class="text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="px-8 pb-6 text-gray-400 hidden animate-fade-in">
+                        Call Track works on all Android devices running Android 8.0 (Oreo) and above. We recommend
+                        disabling battery optimization for the best experience. iOS is currently not supported due to
+                        Apple's system restrictions on call recording.
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="glass-card rounded-2xl overflow-hidden transition-all duration-300">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center group"
+                        onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                        <span class="text-lg font-semibold text-white group-hover:text-brand-400 transition-colors">Is
+                            it legal to record phone calls?</span>
+                        <i data-feather="chevron-down" class="text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="px-8 pb-6 text-gray-400 hidden animate-fade-in">
+                        Call recording laws vary by country and state. Generally, you should inform the other party that
+                        the call is being recorded. Some jurisdictions require "one-party consent" while others require
+                        "all-party consent." Always consult your local laws to ensure compliance.
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="glass-card rounded-2xl overflow-hidden transition-all duration-300">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center group"
+                        onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                        <span class="text-lg font-semibold text-white group-hover:text-brand-400 transition-colors">Does
+                            it work on Dual-SIM phones?</span>
+                        <i data-feather="chevron-down" class="text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="px-8 pb-6 text-gray-400 hidden animate-fade-in">
+                        Yes! Call Track fully supports Dual-SIM devices. You can choose to track calls from both SIMs or
+                        exclude specific numbers and SIM slots in the app settings.
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="glass-card rounded-2xl overflow-hidden transition-all duration-300">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center group"
+                        onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                        <span class="text-lg font-semibold text-white group-hover:text-brand-400 transition-colors">Will
+                            it work if the phone is offline?</span>
+                        <i data-feather="chevron-down" class="text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="px-8 pb-6 text-gray-400 hidden animate-fade-in">
+                        Yes. Calls and recordings are queued locally on the device and will automatically sync to the
+                        cloud as soon as an internet connection (Wi-Fi or Mobile Data) is restored.
+                    </div>
+                </div>
+
+                <!-- FAQ 5 -->
+                <div class="glass-card rounded-2xl overflow-hidden transition-all duration-300">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center group"
+                        onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                        <span class="text-lg font-semibold text-white group-hover:text-brand-400 transition-colors">Can
+                            I record WhatsApp or VoIP calls?</span>
+                        <i data-feather="chevron-down" class="text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="px-8 pb-6 text-gray-400 hidden animate-fade-in">
+                        Currently, Call Track specializes in standard cellular calls. Recording for VoIP apps like
+                        WhatsApp, Telegram, or Zoom is a feature on our roadmap but is not supported in the current
+                        version.
+                    </div>
+                </div>
+
+                <!-- FAQ 6 -->
+                <div class="glass-card rounded-2xl overflow-hidden transition-all duration-300">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center group"
+                        onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                        <span class="text-lg font-semibold text-white group-hover:text-brand-400 transition-colors">How
+                            secure is my data?</span>
+                        <i data-feather="chevron-down" class="text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="px-8 pb-6 text-gray-400 hidden animate-fade-in">
+                        Your privacy is our priority. All call metadata and recordings are encrypted during transit and
+                        at rest in our secure cloud storage. Only authorized users within your organization can access
+                        the recordings through the Admin Panel.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <p class="text-gray-500">Still have questions? <a href="mailto:support@miniclick.com"
+                        class="text-brand-400 hover:text-brand-300 underline underline-offset-4">Contact our support
+                        team</a></p>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="py-24 relative overflow-hidden">
         <div class="absolute inset-0 bg-brand-900/20"></div>
@@ -499,6 +609,7 @@
                                 class="hover:text-white transition-colors">Blog</a></li>
                         <li><a href="privacy/" class="hover:text-white transition-colors">Privacy Policy</a></li>
                         <li><a href="terms/" class="hover:text-white transition-colors">Terms of Use</a></li>
+                        <li><a href="#faqs" class="hover:text-white transition-colors">FAQs</a></li>
                     </ul>
                 </div>
                 <div>
