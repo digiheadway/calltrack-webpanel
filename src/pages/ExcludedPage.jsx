@@ -11,7 +11,12 @@ import {
     XCircle,
     Database,
     RotateCcw,
-    AlertTriangle
+    AlertTriangle,
+    Eye,
+    EyeOff,
+    Cloud,
+    CloudOff,
+    Settings2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Modal from '../components/Modal';
@@ -21,7 +26,7 @@ export default function ExcludedPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ phone: '', name: '', is_active: true });
+    const [formData, setFormData] = useState({ phone: '', name: '', exclude_from_sync: true, exclude_from_list: true });
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -59,10 +64,11 @@ export default function ExcludedPage() {
         try {
             await api.post('/excluded_contacts.php', {
                 ...formData,
-                is_active: formData.is_active ? 1 : 0
+                exclude_from_sync: formData.exclude_from_sync ? 1 : 0,
+                exclude_from_list: formData.exclude_from_list ? 1 : 0
             });
             setIsModalOpen(false);
-            setFormData({ phone: '', name: '', is_active: true });
+            setFormData({ phone: '', name: '', exclude_from_sync: true, exclude_from_list: true });
             toast.success('Contact added to exclusion list');
             fetchContacts();
         } catch (err) {
@@ -138,14 +144,15 @@ export default function ExcludedPage() {
         });
     };
 
-    const toggleStatus = async (e, contact) => {
+    const toggleStatus = async (e, contact, field) => {
         e.preventDefault();
         e.stopPropagation();
         try {
             await api.put(`/excluded_contacts.php?id=${contact.id}`, {
-                is_active: contact.is_active == 1 ? 0 : 1
+                [field]: contact[field] == 1 ? 0 : 1
             });
             fetchContacts();
+            toast.success('Settings updated');
         } catch (err) {
             toast.error('Failed to update status');
         }
@@ -160,8 +167,8 @@ export default function ExcludedPage() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Excluded Contacts</h1>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Numbers in this list will not be synced or tracked across the organization.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Privacy Exclusions</h1>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Manage numbers excluded from syncing or hidden from the organization's call logs.</p>
                 </div>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -205,7 +212,8 @@ export default function ExcludedPage() {
                             <tr>
                                 <th className="px-6 py-4">Contact</th>
                                 <th className="px-6 py-4">Phone Number</th>
-                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4">Sync Exclusion</th>
+                                <th className="px-6 py-4">List Exclusion</th>
                                 <th className="px-6 py-4">Added On</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
@@ -230,14 +238,29 @@ export default function ExcludedPage() {
                                     <td className="px-6 py-4">
                                         <button
                                             type="button"
-                                            onClick={(e) => toggleStatus(e, c)}
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${c.is_active == 1
-                                                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-900/30'
-                                                : 'bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-600'
+                                            onClick={(e) => toggleStatus(e, c, 'exclude_from_sync')}
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${c.exclude_from_sync == 1
+                                                ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900/30'
+                                                : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-900/30'
                                                 }`}
+                                            title={c.exclude_from_sync == 1 ? "Synchronization is DISABLED for this number" : "Synchronization is ENABLED"}
                                         >
-                                            {c.is_active == 1 ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                                            {c.is_active == 1 ? 'Active' : 'Disabled'}
+                                            {c.exclude_from_sync == 1 ? <CloudOff size={12} /> : <Cloud size={12} />}
+                                            {c.exclude_from_sync == 1 ? 'Excluded' : 'Syncing'}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => toggleStatus(e, c, 'exclude_from_list')}
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${c.exclude_from_list == 1
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600'
+                                                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30'
+                                                }`}
+                                            title={c.exclude_from_list == 1 ? "Hidden from all call logs" : "Visible in call logs"}
+                                        >
+                                            {c.exclude_from_list == 1 ? <EyeOff size={12} /> : <Eye size={12} />}
+                                            {c.exclude_from_list == 1 ? 'Hidden' : 'Visible'}
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
@@ -306,15 +329,31 @@ export default function ExcludedPage() {
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                         />
                     </div>
-                    <div className="flex items-center gap-2 pt-2">
-                        <input
-                            type="checkbox"
-                            id="is_active"
-                            checked={formData.is_active}
-                            onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
-                            className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
-                        />
-                        <label htmlFor="is_active" className="text-sm text-gray-700 dark:text-gray-300">Enable this exclusion immediately</label>
+                    <div className="space-y-3 pt-2">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="exclude_from_sync"
+                                checked={formData.exclude_from_sync}
+                                onChange={e => setFormData({ ...formData, exclude_from_sync: e.target.checked })}
+                                className="w-4 h-4 text-red-600 rounded border-gray-300 dark:border-gray-600 focus:ring-red-500 bg-white dark:bg-gray-700"
+                            />
+                            <label htmlFor="exclude_from_sync" className="text-sm text-gray-700 dark:text-gray-300">
+                                <strong>Exclude from Sync</strong> (Stop tracking new calls)
+                            </label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="exclude_from_list"
+                                checked={formData.exclude_from_list}
+                                onChange={e => setFormData({ ...formData, exclude_from_list: e.target.checked })}
+                                className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
+                            />
+                            <label htmlFor="exclude_from_list" className="text-sm text-gray-700 dark:text-gray-300">
+                                <strong>Hide from List</strong> (Hide previous and future calls from logs)
+                            </label>
+                        </div>
                     </div>
                     <div className="pt-4 flex gap-3">
                         <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 btn bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
