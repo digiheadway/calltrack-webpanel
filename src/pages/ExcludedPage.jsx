@@ -28,6 +28,7 @@ export default function ExcludedPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('full'); // 'full' or 'privacy'
     const [formData, setFormData] = useState({ phone: '', name: '', type: 'full' });
+    const [editingId, setEditingId] = useState(null);
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -63,18 +64,29 @@ export default function ExcludedPage() {
         e.preventDefault();
         setSaving(true);
         try {
-            await api.post('/excluded_contacts.php', {
-                phone: formData.phone,
-                name: formData.name,
-                exclude_from_sync: formData.type === 'full' ? 1 : 0,
-                exclude_from_list: 1 // Both types in this UI imply list exclusion
-            });
+            if (editingId) {
+                await api.put(`/excluded_contacts.php?id=${editingId}`, {
+                    phone: formData.phone,
+                    name: formData.name,
+                    exclude_from_sync: formData.type === 'full' ? 1 : 0,
+                    exclude_from_list: 1
+                });
+                toast.success('Exclusion updated');
+            } else {
+                await api.post('/excluded_contacts.php', {
+                    phone: formData.phone,
+                    name: formData.name,
+                    exclude_from_sync: formData.type === 'full' ? 1 : 0,
+                    exclude_from_list: 1
+                });
+                toast.success('Contact added to exclusion list');
+            }
             setIsModalOpen(false);
+            setEditingId(null);
             setFormData({ phone: '', name: '', type: activeTab });
-            toast.success('Contact added to exclusion list');
             fetchContacts();
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to add contact');
+            toast.error(err.response?.data?.message || 'Failed to save');
         } finally {
             setSaving(false);
         }
@@ -146,18 +158,14 @@ export default function ExcludedPage() {
         });
     };
 
-    const toggleSyncType = async (e, contact) => {
-        e.preventDefault();
-        e.stopPropagation();
-        try {
-            await api.put(`/excluded_contacts.php?id=${contact.id}`, {
-                exclude_from_sync: contact.exclude_from_sync == 1 ? 0 : 1
-            });
-            fetchContacts();
-            toast.success('Exclusion mode updated');
-        } catch (err) {
-            toast.error('Failed to update status');
-        }
+    const handleEdit = (contact) => {
+        setEditingId(contact.id);
+        setFormData({
+            phone: contact.phone,
+            name: contact.name || '',
+            type: contact.exclude_from_sync == 1 ? 'full' : 'privacy'
+        });
+        setIsModalOpen(true);
     };
 
     const filtered = contacts.filter(c => {
@@ -203,7 +211,11 @@ export default function ExcludedPage() {
                     )}
                     <button
                         type="button"
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => {
+                            setEditingId(null);
+                            setFormData({ phone: '', name: '', type: activeTab });
+                            setIsModalOpen(true);
+                        }}
                         className="btn btn-primary whitespace-nowrap gap-2"
                     >
                         <Plus size={18} />
@@ -253,33 +265,32 @@ export default function ExcludedPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                             {filtered.map((c) => (
-                                <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                <tr
+                                    key={c.id}
+                                    onClick={() => handleEdit(c)}
+                                    className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer group"
+                                >
+                                    <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                                                <User size={14} />
+                                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">
+                                                {(c.name || 'U').charAt(0).toUpperCase()}
                                             </div>
-                                            {c.name || <span className="text-gray-400 dark:text-gray-500 italic">No name</span>}
+                                            <span className="font-medium text-gray-900 dark:text-white">{c.name || 'Unnamed Contact'}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                            <Phone size={14} className="text-gray-400 dark:text-gray-500" />
-                                            {c.phone}
-                                        </div>
+                                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300 font-mono text-xs">
+                                        {c.phone}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => toggleSyncType(e, c)}
+                                        <div
                                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${c.exclude_from_sync == 1
                                                 ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900/30'
                                                 : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30'
                                                 }`}
                                         >
                                             {c.exclude_from_sync == 1 ? <CloudOff size={12} /> : <Database size={12} />}
-                                            {c.exclude_from_sync == 1 ? 'Tracking Stopped' : 'Silent Tracking'}
-                                        </button>
+                                            {c.exclude_from_sync == 1 ? 'No Tracking' : 'Excluded from lists'}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                                         {new Date(c.created_at).toLocaleDateString()}
@@ -288,7 +299,7 @@ export default function ExcludedPage() {
                                         <div className="flex items-center justify-end gap-1">
                                             <button
                                                 type="button"
-                                                onClick={(e) => handleDeleteContactData(e, c.phone)}
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteContactData(e, c.phone); }}
                                                 disabled={deleting}
                                                 className="p-2 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 rounded-lg transition-colors"
                                                 title="Erase all history for this contact"
@@ -297,7 +308,7 @@ export default function ExcludedPage() {
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={(e) => handleDelete(e, c.id)}
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(e, c.id); }}
                                                 className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors"
                                                 title="Remove from exclusion list"
                                             >
@@ -322,8 +333,12 @@ export default function ExcludedPage() {
 
             <Modal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title="Exclude New Contact"
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setEditingId(null);
+                    setFormData({ phone: '', name: '', type: activeTab });
+                }}
+                title={editingId ? 'Edit Exclusion' : 'Add Number to Exclude'}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -382,9 +397,23 @@ export default function ExcludedPage() {
                         </div>
                     </div>
                     <div className="pt-4 flex gap-3">
-                        <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 btn bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
-                        <button type="submit" disabled={saving} className="flex-1 btn btn-primary">
-                            {saving ? 'Saving...' : 'Add Exclusion'}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsModalOpen(false);
+                                setEditingId(null);
+                                setFormData({ phone: '', name: '', type: activeTab });
+                            }}
+                            className="flex-1 btn bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={saving || !formData.phone}
+                            className="flex-1 btn btn-primary"
+                        >
+                            {saving ? 'Saving...' : editingId ? 'Update Settings' : 'Exclude Number'}
                         </button>
                     </div>
                 </form>
