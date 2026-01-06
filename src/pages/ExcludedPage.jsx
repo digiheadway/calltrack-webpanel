@@ -221,7 +221,7 @@ export default function ExcludedPage() {
                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
-                        Full Exclusions
+                        No Tracking
                         <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs">
                             {contacts.filter(c => c.exclude_from_sync == 1 && c.exclude_from_list == 1).length}
                         </span>
@@ -233,7 +233,7 @@ export default function ExcludedPage() {
                             : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
-                        Log Privacy
+                        Excluded from lists
                         <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs">
                             {contacts.filter(c => c.exclude_from_sync == 0 && c.exclude_from_list == 1).length}
                         </span>
@@ -360,9 +360,9 @@ export default function ExcludedPage() {
                             >
                                 <div className="flex items-center gap-2 mb-1">
                                     <CloudOff size={16} className={formData.type === 'full' ? 'text-blue-600' : 'text-gray-400'} />
-                                    <span className="font-bold text-sm">Full Exclusion</span>
+                                    <span className="font-bold text-sm">No Tracking</span>
                                 </div>
-                                <p className="text-[11px] text-gray-500">No tracking, no logs. Maximum privacy.</p>
+                                <p className="text-[11px] text-gray-500">Stop recording and hiding from logs.</p>
                             </button>
 
                             <button
@@ -375,9 +375,9 @@ export default function ExcludedPage() {
                             >
                                 <div className="flex items-center gap-2 mb-1">
                                     <EyeOff size={16} className={formData.type === 'privacy' ? 'text-blue-600' : 'text-gray-400'} />
-                                    <span className="font-bold text-sm">Log Privacy</span>
+                                    <span className="font-bold text-sm">Excluded from lists</span>
                                 </div>
-                                <p className="text-[11px] text-gray-500">Track calls silently, hide from UI.</p>
+                                <p className="text-[11px] text-gray-500">Keep recording but hide from UI.</p>
                             </button>
                         </div>
                     </div>
