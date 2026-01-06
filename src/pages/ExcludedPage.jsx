@@ -26,7 +26,8 @@ export default function ExcludedPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ phone: '', name: '', exclude_from_sync: true, exclude_from_list: true });
+    const [activeTab, setActiveTab] = useState('full'); // 'full' or 'privacy'
+    const [formData, setFormData] = useState({ phone: '', name: '', type: 'full' });
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -63,12 +64,13 @@ export default function ExcludedPage() {
         setSaving(true);
         try {
             await api.post('/excluded_contacts.php', {
-                ...formData,
-                exclude_from_sync: formData.exclude_from_sync ? 1 : 0,
-                exclude_from_list: formData.exclude_from_list ? 1 : 0
+                phone: formData.phone,
+                name: formData.name,
+                exclude_from_sync: formData.type === 'full' ? 1 : 0,
+                exclude_from_list: 1 // Both types in this UI imply list exclusion
             });
             setIsModalOpen(false);
-            setFormData({ phone: '', name: '', exclude_from_sync: true, exclude_from_list: true });
+            setFormData({ phone: '', name: '', type: activeTab });
             toast.success('Contact added to exclusion list');
             fetchContacts();
         } catch (err) {
@@ -144,24 +146,29 @@ export default function ExcludedPage() {
         });
     };
 
-    const toggleStatus = async (e, contact, field) => {
+    const toggleSyncType = async (e, contact) => {
         e.preventDefault();
         e.stopPropagation();
         try {
             await api.put(`/excluded_contacts.php?id=${contact.id}`, {
-                [field]: contact[field] == 1 ? 0 : 1
+                exclude_from_sync: contact.exclude_from_sync == 1 ? 0 : 1
             });
             fetchContacts();
-            toast.success('Settings updated');
+            toast.success('Exclusion mode updated');
         } catch (err) {
             toast.error('Failed to update status');
         }
     };
 
-    const filtered = contacts.filter(c =>
-        c.phone.includes(search) ||
-        (c.name && c.name.toLowerCase().includes(search.toLowerCase()))
-    );
+    const filtered = contacts.filter(c => {
+        const matchesSearch = c.phone.includes(search) || (c.name && c.name.toLowerCase().includes(search.toLowerCase()));
+        const isFull = c.exclude_from_sync == 1 && c.exclude_from_list == 1;
+        const isPrivacy = c.exclude_from_sync == 0 && c.exclude_from_list == 1;
+
+        if (activeTab === 'full') return matchesSearch && isFull;
+        if (activeTab === 'privacy') return matchesSearch && isPrivacy;
+        return matchesSearch;
+    });
 
     return (
         <div className="space-y-6">
@@ -206,14 +213,40 @@ export default function ExcludedPage() {
             </div>
 
             <div className="card !p-0 overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-800">
+                <div className="flex border-b border-gray-200 dark:border-gray-700 px-6">
+                    <button
+                        onClick={() => setActiveTab('full')}
+                        className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === 'full'
+                            ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            }`}
+                    >
+                        Full Exclusions
+                        <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs">
+                            {contacts.filter(c => c.exclude_from_sync == 1 && c.exclude_from_list == 1).length}
+                        </span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('privacy')}
+                        className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === 'privacy'
+                            ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            }`}
+                    >
+                        Log Privacy
+                        <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs">
+                            {contacts.filter(c => c.exclude_from_sync == 0 && c.exclude_from_list == 1).length}
+                        </span>
+                    </button>
+                </div>
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-medium">
                             <tr>
                                 <th className="px-6 py-4">Contact</th>
                                 <th className="px-6 py-4">Phone Number</th>
-                                <th className="px-6 py-4">Sync Exclusion</th>
-                                <th className="px-6 py-4">List Exclusion</th>
+                                <th className="px-6 py-4">Mode</th>
                                 <th className="px-6 py-4">Added On</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
@@ -238,29 +271,14 @@ export default function ExcludedPage() {
                                     <td className="px-6 py-4">
                                         <button
                                             type="button"
-                                            onClick={(e) => toggleStatus(e, c, 'exclude_from_sync')}
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${c.exclude_from_sync == 1
+                                            onClick={(e) => toggleSyncType(e, c)}
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${c.exclude_from_sync == 1
                                                 ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900/30'
-                                                : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-900/30'
+                                                : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30'
                                                 }`}
-                                            title={c.exclude_from_sync == 1 ? "Synchronization is DISABLED for this number" : "Synchronization is ENABLED"}
                                         >
-                                            {c.exclude_from_sync == 1 ? <CloudOff size={12} /> : <Cloud size={12} />}
-                                            {c.exclude_from_sync == 1 ? 'Excluded' : 'Syncing'}
-                                        </button>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => toggleStatus(e, c, 'exclude_from_list')}
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${c.exclude_from_list == 1
-                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600'
-                                                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30'
-                                                }`}
-                                            title={c.exclude_from_list == 1 ? "Hidden from all call logs" : "Visible in call logs"}
-                                        >
-                                            {c.exclude_from_list == 1 ? <EyeOff size={12} /> : <Eye size={12} />}
-                                            {c.exclude_from_list == 1 ? 'Hidden' : 'Visible'}
+                                            {c.exclude_from_sync == 1 ? <CloudOff size={12} /> : <Database size={12} />}
+                                            {c.exclude_from_sync == 1 ? 'Tracking Stopped' : 'Silent Tracking'}
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
@@ -330,29 +348,37 @@ export default function ExcludedPage() {
                         />
                     </div>
                     <div className="space-y-3 pt-2">
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="exclude_from_sync"
-                                checked={formData.exclude_from_sync}
-                                onChange={e => setFormData({ ...formData, exclude_from_sync: e.target.checked })}
-                                className="w-4 h-4 text-red-600 rounded border-gray-300 dark:border-gray-600 focus:ring-red-500 bg-white dark:bg-gray-700"
-                            />
-                            <label htmlFor="exclude_from_sync" className="text-sm text-gray-700 dark:text-gray-300">
-                                <strong>Exclude from Sync</strong> (Stop tracking new calls)
-                            </label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="exclude_from_list"
-                                checked={formData.exclude_from_list}
-                                onChange={e => setFormData({ ...formData, exclude_from_list: e.target.checked })}
-                                className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
-                            />
-                            <label htmlFor="exclude_from_list" className="text-sm text-gray-700 dark:text-gray-300">
-                                <strong>Hide from List</strong> (Hide previous and future calls from logs)
-                            </label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Exclusion Type</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, type: 'full' })}
+                                className={`p-3 rounded-xl border text-left transition-all ${formData.type === 'full'
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-500'
+                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2 mb-1">
+                                    <CloudOff size={16} className={formData.type === 'full' ? 'text-blue-600' : 'text-gray-400'} />
+                                    <span className="font-bold text-sm">Full Exclusion</span>
+                                </div>
+                                <p className="text-[11px] text-gray-500">No tracking, no logs. Maximum privacy.</p>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, type: 'privacy' })}
+                                className={`p-3 rounded-xl border text-left transition-all ${formData.type === 'privacy'
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-500'
+                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2 mb-1">
+                                    <EyeOff size={16} className={formData.type === 'privacy' ? 'text-blue-600' : 'text-gray-400'} />
+                                    <span className="font-bold text-sm">Log Privacy</span>
+                                </div>
+                                <p className="text-[11px] text-gray-500">Track calls silently, hide from UI.</p>
+                            </button>
                         </div>
                     </div>
                     <div className="pt-4 flex gap-3">
